@@ -33,11 +33,11 @@ function renderTitle() {
 
 function applyLang() {
   renderTitle();
-  document.querySelectorAll("[data-i18n]").forEach((el) => {
-    el.textContent = t(el.dataset.i18n);
+  document.querySelectorAll("[data-t]").forEach((el) => {
+    el.textContent = t(el.dataset.t);
   });
-  document.querySelectorAll("[data-i18n-ph]").forEach((el) => {
-    el.setAttribute("placeholder", t(el.dataset.i18nPh));
+  document.querySelectorAll("[data-t-ph]").forEach((el) => {
+    el.setAttribute("placeholder", t(el.dataset.tPh));
   });
   if (form) form.applyLang();
 }

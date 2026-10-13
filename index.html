@@ -28,7 +28,7 @@
 <main id="app">
   <header id="head">
     <h1 id="title"><!-- rendered by main.js (holds the live count) --></h1>
-    <p id="intro-text" data-i18n="intro"></p>
+    <p id="intro-text" data-t="intro"></p>
   </header>
 
   <div id="bottom">
@@ -44,8 +44,8 @@
       </section>
     </div>
 
-    <button id="add-btn" type="button" data-i18n="add">Add a dot</button>
-    <p id="dot-note" data-i18n="note">Each dot represents a student</p>
+    <button id="add-btn" type="button" data-t="add">Add a dot</button>
+    <p id="dot-note" data-t="note">Each dot represents a student</p>
   </div>
 </main>
 
@@ -54,38 +54,44 @@
   <div class="modal-backdrop" data-close></div>
   <form id="add-form" class="sheet" novalidate>
     <div class="sheet-head">
-      <h2 data-i18n="formTitle">Add your dot</h2>
+      <h2 data-t="formTitle">Add your dot</h2>
       <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
     </div>
 
     <label>
-      <span data-i18n="fName">Name or nickname</span>
+      <span data-t="fName">Name or nickname</span>
       <input id="f-name" name="name" type="text" autocomplete="off" maxlength="40" required />
     </label>
 
     <label>
-      <span data-i18n="fCountry">Country</span>
-      <input id="f-country" name="country" type="text" list="country-list"
-             autocomplete="off" data-i18n-ph="countryPlaceholder" required />
-      <datalist id="country-list"></datalist>
-      <small id="f-country-err" class="err" data-i18n="fCountryErr" hidden>Pick a country from the list.</small>
+      <span data-t="fCountry">Country</span>
+      <div class="combo">
+        <input id="f-country" name="country" type="text" autocomplete="off" data-t-ph="countryPlaceholder" required />
+        <ul id="country-list" class="combo-list" hidden></ul>
+      </div>
+      <small id="f-country-err" class="err" data-t="fCountryErr" hidden>Pick a country from the list.</small>
     </label>
 
     <label>
-      <span data-i18n="fCity">City</span> <span class="opt" data-i18n="fCityOpt">(optional)</span>
-      <input id="f-city" name="city" type="text" list="city-list"
-             autocomplete="off" data-i18n-ph="cityDisabled" disabled />
-      <datalist id="city-list"></datalist>
+      <span class="lbl"><span data-t="fCity">City</span> <span class="opt" data-t="fCityOpt">(optional)</span></span>
+      <div class="combo">
+        <input id="f-city" name="city" type="text"
+               autocomplete="off" data-t-ph="cityDisabled" disabled />
+        <ul id="city-list" class="combo-list" hidden></ul>
+      </div>
     </label>
 
     <label>
-      <span data-i18n="fText">One line about the USTP</span>
+      <span data-t="fText">One line about the USTP</span>
       <textarea id="f-text" name="text" rows="2" maxlength="120" required
-                data-i18n-ph="textPlaceholder"></textarea>
-      <small class="count-hint"><span id="f-text-count">0</span>/120</small>
+                data-t-ph="textPlaceholder"></textarea>
+      <div class="field-foot">
+        <small id="req-note" class="req-note" data-t="required">Required</small>
+        <small class="count-hint"><span id="f-text-count">0</span>/120</small>
+      </div>
     </label>
 
-    <button type="submit" class="submit-btn" data-i18n="submit">Add my dot</button>
+    <button type="submit" class="submit-btn" data-t="submit">Add my dot</button>
   </form>
 </div>
 
