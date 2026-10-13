@@ -1,0 +1,277 @@
+/* ---- Design tokens ---- */
+:root {
+  --bg: #ece9e2;          /* warm off-white, like the reference */
+  --ink: #1a1a1a;
+  --muted: #6a6a6a;
+  --accent: #e0a526;      /* gold highlight */
+  --country: #ffffff;     /* idle country fill */
+  --country-line: #d6d2c8;
+  --dot: #b9b4a8;         /* idle student dot (grey) */
+  --dot-active: #e0a526;  /* dot in the active country (gold) */
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+body { overflow: hidden; }
+
+/* ---- Globe fills the whole screen, behind the UI (no box) ---- */
+#globe {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  display: block;
+  z-index: 0;
+  touch-action: none;        /* so dragging the globe doesn't scroll */
+}
+
+/* ---- Overlaid UI column ---- */
+#app {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100dvh;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 24px 24px calc(20px + env(safe-area-inset-bottom));
+  pointer-events: none;      /* let drags fall through to the globe... */
+}
+#app button,
+#app #progress { pointer-events: auto; }  /* ...except the controls */
+
+/* Header (constant) */
+#head { flex: 0 0 auto; }
+
+#title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 6vw, 2.2rem);
+  line-height: 1.1;
+  margin: 0 0 0.5em;
+}
+
+#intro-text {
+  margin: 0;
+  font-size: clamp(0.85rem, 2.4vw, 0.95rem);
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 42ch;
+}
+
+/* Bottom block (progress + post + button) */
+#bottom { flex: 0 0 auto; }
+
+/* ---- Progress indicator ---- */
+#progress {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  min-height: 16px;
+  margin: 4px 0 10px;
+}
+
+#progress .dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--country-line);
+  cursor: pointer;
+}
+#progress .dot.active { background: var(--accent); }
+
+/* many posts -> compact bar + counter instead of 100 dots */
+#progress .bar {
+  flex: 1 1 auto;
+  height: 3px;
+  background: var(--country-line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+#progress .bar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+#progress .counter {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Post (left-aligned) ---- */
+#post {
+  flex: 0 0 auto;
+  min-height: 5.2em;         /* reserve space so typing doesn't shift layout */
+}
+
+.post-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.post-author {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.chip {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+}
+
+.post-text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.25rem, 4.6vw, 1.7rem);
+  line-height: 1.25;
+  margin: 0;
+}
+
+.post-text.typing::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--ink);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 0.8s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---- Add-a-dot button ---- */
+#add-btn {
+  flex: 0 0 auto;
+  margin-top: 12px;
+  padding: 13px 18px;
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+#add-btn:active { transform: translateY(1px); }
+
+/* ---- Modal / bottom sheet ---- */
+.modal { position: fixed; inset: 0; z-index: 50; }
+.modal[hidden] { display: none; }
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 26, 26, 0.4);
+}
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--bg);
+  border-radius: 16px 16px 0 0;
+  padding: 18px 22px calc(22px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } }
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sheet-head h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.icon-btn {
+  border: none;
+  background: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.sheet label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.sheet .opt { font-weight: 400; }
+
+.sheet input,
+.sheet textarea {
+  font: inherit;
+  font-weight: 400;
+  color: var(--ink);
+  padding: 10px 12px;
+  border: 1px solid var(--country-line);
+  border-radius: 8px;
+  background: #fff;
+  width: 100%;
+}
+.sheet input:focus,
+.sheet textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.sheet input:disabled { background: #f3f1ea; color: #aaa; }
+.sheet textarea { resize: none; }
+
+.err { color: #b4452a; font-weight: 400; }
+.count-hint { color: var(--muted); font-weight: 400; text-align: right; }
+
+.submit-btn {
+  margin-top: 2px;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.submit-btn:disabled { opacity: 0.5; cursor: default; }

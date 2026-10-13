@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>USTP's World</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+<!-- Globe fills the screen, behind everything -->
+<canvas id="globe"></canvas>
+
+<!-- Overlaid UI -->
+<main id="app">
+  <header id="head">
+    <h1 id="title">
+      What <span id="count">0</span> students say about the USTP St.&nbsp;Pölten
+    </h1>
+    <p id="intro-text">
+      Students from across Europe and beyond study at the University of
+      Applied Sciences St.&nbsp;Pölten. This is where they're from.
+    </p>
+  </header>
+
+  <div id="bottom">
+    <div id="progress"></div>
+
+    <section id="post" hidden>
+      <div class="post-head">
+        <span id="post-author" class="post-author"></span>
+        <span id="post-country" class="chip"></span>
+      </div>
+      <p id="post-text" class="post-text"></p>
+    </section>
+
+    <button id="add-btn" type="button">Add a dot</button>
+  </div>
+</main>
+
+<!-- Add-a-dot modal -->
+<div id="modal" class="modal" hidden>
+  <div class="modal-backdrop" data-close></div>
+  <form id="add-form" class="sheet" novalidate>
+    <div class="sheet-head">
+      <h2>Add your dot</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+    </div>
+
+    <label>
+      Name or nickname
+      <input id="f-name" name="name" type="text" autocomplete="off" maxlength="40" required />
+    </label>
+
+    <label>
+      Country
+      <input id="f-country" name="country" type="text" list="country-list"
+             autocomplete="off" placeholder="Start typing…" required />
+      <datalist id="country-list"></datalist>
+      <small id="f-country-err" class="err" hidden>Pick a country from the list.</small>
+    </label>
+
+    <label>
+      City <span class="opt">(optional)</span>
+      <input id="f-city" name="city" type="text" list="city-list"
+             autocomplete="off" placeholder="Pick your country first" disabled />
+      <datalist id="city-list"></datalist>
+    </label>
+
+    <label>
+      One line about the USTP
+      <textarea id="f-text" name="text" rows="2" maxlength="120" required
+                placeholder="What do you like most about it?"></textarea>
+      <small class="count-hint"><span id="f-text-count">0</span>/120</small>
+    </label>
+
+    <button type="submit" class="submit-btn">Add my dot</button>
+  </form>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
