@@ -108,10 +108,19 @@ function renderProgress(activeIndex = -1) {
   }
 }
 
+const postHeadEl = document.querySelector(".post-head");
+
 // --- globe hooks ---
 const hooks = {
+  onLeave() {
+    clearInterval(typeTimer);
+    postEl.hidden = false;
+    postHeadEl.style.visibility = "none";
+    textEl.textContent = "";
+  },
   async onArrive(p, i, _token, isCurrent) {
     postEl.hidden = false;
+    postHeadEl.style.visibility = "visible";
     authorEl.textContent = p.name || "";
     countryEl.textContent = p.country;
     renderProgress(i);
