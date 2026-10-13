@@ -98,11 +98,11 @@ export function createGlobe(canvas, posts, hooks = {}) {
 
     if (activeFeature) drawCountryGlow(activeFeature);
 
-    // student dots — gold in the active country, grey elsewhere
-    posts.forEach((p) => {
+    // student dots
+    posts.forEach((p, idx) => {
       if (!isVisible(p.lng, p.lat)) return;
       const [x, y] = projection([p.lng, p.lat]);
-      const on = p.country === activeCountry;
+      const on = idx === activeIndex;
       ctx.beginPath();
       ctx.arc(x, y, on ? 3 : 2, 0, 2 * Math.PI);
       ctx.fillStyle = on ? COL.dotActive : COL.dot;
@@ -163,19 +163,22 @@ export function createGlobe(canvas, posts, hooks = {}) {
   let current = 0;
   let seq = 0;        // guards against overlapping transitions (e.g. a jump)
   let timer = null;
+  let activeIndex = -1;
 
   async function showPost(i) {
     const token = ++seq;
     const p = posts[i];
-    const targetZoom = p.country === "Austria" ? 2.2 : 1.5;
+    const targetZoom = 1.5;
 
     activeCountry = null;
+    activeIndex = -1;
     if (hooks.onLeave) hooks.onLeave();
 
     await animateTo([-p.lng, -p.lat], targetZoom, 1400);
-    if (token !== seq) return; // superseded by a newer navigation
+    if (token !== seq) return;
 
     activeCountry = p.country;
+    activeIndex = i;
     draw();
     if (hooks.onArrive) await hooks.onArrive(p, i, token, () => token === seq);
   }
