@@ -7,6 +7,7 @@ import { createGlobe } from "./globe.js";
 import { posts as seedPosts } from "./posts.js";
 import { setupForm } from "./form.js";
 import { language, t } from "./translations.js";
+import { setupWall } from "./wall.js";
 
 // live, mutable list (seeds now; Supabase + 100 defaults later)
 const posts = [...seedPosts];
@@ -20,6 +21,7 @@ const countryEl = document.getElementById("post-country");
 const textEl = document.getElementById("post-text");
 const progressEl = document.getElementById("progress");
 const addBtn = document.getElementById("add-btn");
+const wallBtn = document.getElementById("wall-btn");
 const langEl = document.getElementById("lang");
 
 // --- i18n ---
@@ -112,31 +114,36 @@ const postHeadEl = document.querySelector(".post-head");
 
 // --- globe hooks ---
 const hooks = {
-  onLeave() {
+  // BEFORE the globe moves: show the new name + country, clear the old message
+  // (the blinking caret sits on the empty line while the globe travels)
+  onHeader(p, i) {
     clearInterval(typeTimer);
     postEl.hidden = false;
-    postHeadEl.style.visibility = "none";
-    textEl.textContent = "";
-  },
-  async onArrive(p, i, _token, isCurrent) {
-    postEl.hidden = false;
-    postHeadEl.style.visibility = "visible";
+    postHeadEl.style.display = "flex";
     authorEl.textContent = p.name || "";
     countryEl.textContent = p.country;
+    textEl.textContent = "";
     renderProgress(i);
+  },
+  // AFTER arrival (dot highlighted): type the message
+  async onArrive(p, i, _token, isCurrent) {
     await typeText(p.text, textEl, isCurrent);
   },
 };
 
 const globe = createGlobe(canvas, posts, hooks);
 
-// --- Add-a-dot: push into the live list, then jump to show it off ---
+// -AddBtn
 const form = setupForm((post) => {
   posts.push(post);
   renderTitle();
   globe.jumpTo(posts.length - 1); // the new dot becomes the next story
 });
 addBtn.addEventListener("click", form.open);
+
+// -WallBtn
+const wall = setupWall(posts);
+wallBtn.addEventListener("click", wall.open);
 
 // --- go ---
 applyLang();

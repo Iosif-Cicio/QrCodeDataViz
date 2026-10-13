@@ -9,7 +9,6 @@ export const translations = {
         title: "What {n} students say about the USTP St.\u00a0Pölten",
         intro:
             "Students from across Europe and beyond study at the University of Applied Sciences St.\u00a0Pölten. This is where they're from.",
-        add: "Add a dot",
         note: "Each dot represents a student",
         formTitle: "Add your dot",
         fName: "Name or nickname*",
@@ -24,12 +23,15 @@ export const translations = {
         cityDisabled: "Pick your country first",
         cityEnabled: "Start typing…",
         required: "*Required",
+        add: "Add quote",
+        wall: "Quote Wall",
+        wallTitle: "What our students say",
+        wallSub: "quotes",
     },
     de: {
         title: "Was {n} Studierende über die USTP St.\u00a0Pölten sagen",
         intro:
             "Studierende aus ganz Europa und darüber hinaus studieren an der Fachhochschule St.\u00a0Pölten. Von hier kommen sie.",
-        add: "Punkt hinzufügen",
         note: "Jeder Punkt steht für eine*n Studierende*n",
         formTitle: "Deinen Punkt hinzufügen",
         fName: "Name oder Spitzname*",
@@ -44,6 +46,10 @@ export const translations = {
         cityDisabled: "Zuerst das Land wählen",
         cityEnabled: "Tippen…",
         required: "*Pflichtfeld",
+        add: "Zitat hinzufügen",
+        wall: "Zitatwand",
+        wallTitle: "Was unsere Studierenden sagen",
+        wallSub: "Zitate",
     },
 };
 

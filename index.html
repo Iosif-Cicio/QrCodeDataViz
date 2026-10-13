@@ -44,10 +44,24 @@
       </section>
     </div>
 
-    <button id="add-btn" type="button" data-t="add">Add a dot</button>
+    <div class="actions">
+      <button id="add-btn" class="pill-btn" type="button" data-t="add">Add quote</button>
+      <button id="wall-btn" class="pill-btn" type="button" data-t="wall">Quote Wall</button>
+    </div>
     <p id="dot-note" data-t="note">Each dot represents a student</p>
   </div>
 </main>
+
+<div id="wall" class="wall" hidden>
+  <div class="wall-head">
+    <div class="wall-heading">
+      <h2 class="wall-title" data-t="wallTitle">What our students say</h2>
+      <p class="wall-sub"><span id="wall-count">0</span> <span data-t="wallSub">quotes</span></p>
+    </div>
+    <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+  </div>
+  <div id="wall-grid" class="wall-grid"></div>
+</div>
 
 <!-- Add-a-dot modal -->
 <div id="modal" class="modal" hidden>

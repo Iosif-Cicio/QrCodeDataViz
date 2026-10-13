@@ -158,6 +158,7 @@ body { overflow: hidden; }
 
 .story-box {
   width: min(100%, 32rem);
+  margin-inline: auto;
   background: var(--veil);
   backdrop-filter: blur(3px);
   padding: 12px 16px;
@@ -232,6 +233,7 @@ body { overflow: hidden; }
   text-transform: uppercase;
   padding: 3px 8px;
 }
+.chip:empty { display: none; }
 
 .post-text {
   font-family: var(--font-serif);
@@ -267,11 +269,15 @@ body { overflow: hidden; }
   pointer-events: none;
 }
 
-/* ---- Add-a-dot button (subtle, like the reference) ---- */
-#add-btn {
-  display: block;
-  margin: 10px auto 0;
-  padding: 11px 24px;
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.pill-btn {
+  padding: 11px 20px;
   border: 1px solid var(--country-line);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.55);
@@ -280,10 +286,73 @@ body { overflow: hidden; }
   font-weight: 500;
   cursor: pointer;
   backdrop-filter: blur(2px);
+  -webkit-tap-highlight-color: transparent;
   transition: background 0.15s ease;
 }
-#add-btn:hover { background: rgba(255, 255, 255, 0.85); }
-#add-btn:active { transform: translateY(1px); }
+.pill-btn:hover { background: rgba(255, 255, 255, 0.85); }
+.pill-btn:active { transform: translateY(1px); }
+
+/* ---- Quote Wall overlay ---- */
+.wall {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+.wall[hidden] { display: none; }
+
+.wall-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--country-line);
+}
+.wall-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
+  margin: 0;
+}
+.wall-sub {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.wall-grid {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 20px 24px 48px;
+  columns: 17rem;            /* masonry-style columns */
+  column-gap: 14px;
+}
+
+.quote-card {
+  break-inside: avoid;
+  margin: 0 0 14px;
+  background: #fff;
+  border: 1px solid var(--country-line);
+  border-radius: 10px;
+  padding: 16px;
+}
+.quote-card blockquote {
+  margin: 0 0 10px;
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.quote-card figcaption {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
 
 /* ---- Modal / bottom sheet ---- */
 .modal { position: fixed; inset: 0; z-index: 50; }

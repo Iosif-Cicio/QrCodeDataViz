@@ -168,18 +168,25 @@ export function createGlobe(canvas, posts, hooks = {}) {
   async function showPost(i) {
     const token = ++seq;
     const p = posts[i];
-    const targetZoom = 1.5;
+    const targetZoom = 1.5; // same zoom for every story
 
+    // 1. swap the header to the new author + country, clear the old message
+    if (hooks.onHeader) hooks.onHeader(p, i);
+
+    // un-highlight the previous dot / country while the globe travels
     activeCountry = null;
     activeIndex = -1;
-    if (hooks.onLeave) hooks.onLeave();
 
+    // 2. move to the new country
     await animateTo([-p.lng, -p.lat], targetZoom, 1400);
-    if (token !== seq) return;
+    if (token !== seq) return; // superseded by a newer navigation
 
+    // 3. highlight the new dot + glow its country
     activeCountry = p.country;
     activeIndex = i;
     draw();
+
+    // 4. now in position — type the message
     if (hooks.onArrive) await hooks.onArrive(p, i, token, () => token === seq);
   }
 
@@ -196,6 +203,7 @@ export function createGlobe(canvas, posts, hooks = {}) {
   }
 
   function start() {
+    if (running) return;
     running = true;
     playFrom(0);
   }
