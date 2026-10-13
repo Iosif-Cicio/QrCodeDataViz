@@ -6,6 +6,7 @@
 // ---------------------------------------------------------------------------
 
 import { countryList, resolveCountry, citySuggestions, findCity } from "./geo.js";
+import { t } from "./translations.js";
 
 export function setupForm(onSubmit) {
     const modal = document.getElementById("modal");
@@ -30,6 +31,10 @@ export function setupForm(onSubmit) {
     }
     function close() {
         modal.hidden = true;
+    }
+
+    function applyLang() {
+        refreshCity();
     }
 
     // close on backdrop / x
@@ -88,5 +93,5 @@ export function setupForm(onSubmit) {
         close();
     });
 
-    return { open, close };
+    return { open, close, applyLang };
 }

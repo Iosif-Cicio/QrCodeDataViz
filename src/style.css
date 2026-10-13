@@ -1,13 +1,15 @@
 /* ---- Design tokens ---- */
 :root {
-  --bg: #ece9e2;          /* warm off-white, like the reference */
-  --ink: #1a1a1a;
-  --muted: #6a6a6a;
-  --accent: #e0a526;      /* gold highlight */
+  --bg: #e9eff4;          /* USTP light-blue surface (HSL 201/41/93) */
+  --ink: #16293b;         /* deep navy text */
+  --muted: #5b6b7b;       /* cool grey */
+  --accent: #0074cc;      /* USTP blue — chip, toggle, button, active dot */
+  --highlight: #e0a526;   /* gold — the country glow (kept warm for contrast) */
+  --ocean: #f1f6fb;       /* globe disc, a touch lighter than the page */
   --country: #ffffff;     /* idle country fill */
-  --country-line: #d6d2c8;
-  --dot: #b9b4a8;         /* idle student dot (grey) */
-  --dot-active: #e0a526;  /* dot in the active country (gold) */
+  --country-line: #cdd9e4;/* cool hairline border */
+  --dot: #a8b6c4;         /* idle student dot (cool grey) */
+  --dot-active: #0074cc;  /* active post's dot (USTP blue, pops on the gold glow) */
   --font-serif: Georgia, "Times New Roman", serif;
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
@@ -25,7 +27,7 @@ html, body {
 
 body { overflow: hidden; }
 
-/* ---- Globe fills the whole screen, behind the UI (no box) ---- */
+/* ---- Globe fills the whole screen ---- */
 #globe {
   position: fixed;
   inset: 0;
@@ -35,6 +37,65 @@ body { overflow: hidden; }
   z-index: 0;
   touch-action: none;        /* so dragging the globe doesn't scroll */
 }
+
+/* ---- Top bar: brand centred, language toggle pinned right ---- */
+#topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;      /* mobile: brand on the left */
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(214, 210, 200, 0.5);
+  pointer-events: none;
+}
+#topbar #brand,
+#topbar #lang { pointer-events: auto; }
+#brand { display: block; }
+#brand img { height: 40px; display: block; }
+
+@media (min-width: 768px) {
+  #topbar { padding-left: 0; }
+  #brand { margin-left: max(24px, calc(50vw - 47dvh - 40px)); }
+  #lang { margin-right: max(24px, calc(50vw - 46dvh - 40px)); }
+}
+
+#lang {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#lang .lang-label.active { color: var(--accent); }
+#lang .lang-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--country-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+#lang .knob {
+  position: absolute;
+  top: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: left 0.18s ease;
+}
+#lang[data-lang="de"] .knob { left: 2px; }
+#lang[data-lang="en"] .knob { left: 22px; }
 
 /* ---- Overlaid UI column ---- */
 #app {
@@ -46,14 +107,18 @@ body { overflow: hidden; }
   height: 100dvh;
   max-width: 620px;
   margin: 0 auto;
-  padding: 24px 24px calc(20px + env(safe-area-inset-bottom));
+  padding: 64px 24px calc(20px + env(safe-area-inset-bottom));
   pointer-events: none;      /* let drags fall through to the globe... */
 }
 #app button,
 #app #progress { pointer-events: auto; }  /* ...except the controls */
 
-/* Header (constant) */
-#head { flex: 0 0 auto; }
+/* Header (constant, centred over the north pole) */
+#head {
+  flex: 0 0 auto;
+  text-align: center;
+  margin-top: 7vh;
+}
 
 #title {
   font-family: var(--font-serif);
@@ -64,15 +129,19 @@ body { overflow: hidden; }
 }
 
 #intro-text {
-  margin: 0;
+  margin: 0 auto;            /* centre the narrow paragraph under the title */
   font-size: clamp(0.85rem, 2.4vw, 0.95rem);
   line-height: 1.5;
   color: var(--muted);
   max-width: 42ch;
 }
 
-/* Bottom block (progress + post + button) */
-#bottom { flex: 0 0 auto; }
+/* Bottom block (progress + post + button) — lifted so the tweet overlaps
+   the lower globe instead of sitting on empty space */
+#bottom {
+  flex: 0 0 auto;
+  margin-bottom: 6vh;
+}
 
 /* ---- Progress indicator ---- */
 #progress {
@@ -165,7 +234,7 @@ body { overflow: hidden; }
 }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* ---- "Each dot represents a student" ---- */
+/* ---- "Each dot represents a student" caption (pinned bottom-right of screen) ---- */
 #dot-note {
   position: fixed;
   right: 24px;

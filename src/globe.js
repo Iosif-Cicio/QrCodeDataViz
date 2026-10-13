@@ -15,7 +15,7 @@ import countries from "./countries.geo.json";
 
 const css = getComputedStyle(document.documentElement);
 const COL = {
-  ocean: "#f4f2ec",
+  ocean: css.getPropertyValue("--ocean").trim() || "#f1f6fb",
   country: css.getPropertyValue("--country").trim() || "#ffffff",
   line: css.getPropertyValue("--country-line").trim() || "#d6d2c8",
   dot: css.getPropertyValue("--dot").trim() || "#b9b4a8",

@@ -10,16 +10,25 @@
 <!-- Globe fills the screen, behind everything -->
 <canvas id="globe"></canvas>
 
+<!-- Top bar: USTP logo left, DE/EN toggle right -->
+<div id="topbar">
+  <a id="brand" href="https://www.fhstp.ac.at/en" aria-label="USTP — University of Applied Sciences St. Pölten">
+    <img src="/src/ustp-logo.svg" alt="USTP" />
+  </a>
+  <div id="lang" data-lang="en" aria-label="Language">
+    <span class="lang-label de">DE</span>
+    <button class="lang-switch" type="button" aria-label="Switch language">
+      <span class="knob"></span>
+    </button>
+    <span class="lang-label en active">EN</span>
+  </div>
+</div>
+
 <!-- Overlaid UI -->
 <main id="app">
   <header id="head">
-    <h1 id="title">
-      What <span id="count">0</span> students say about the USTP St.&nbsp;Pölten
-    </h1>
-    <p id="intro-text">
-      Students from across Europe and beyond study at the University of
-      Applied Sciences St.&nbsp;Pölten. This is where they're from.
-    </p>
+    <h1 id="title"><!-- rendered by main.js (holds the live count) --></h1>
+    <p id="intro-text" data-i18n="intro"></p>
   </header>
 
   <div id="bottom">
@@ -33,8 +42,8 @@
       <p id="post-text" class="post-text"></p>
     </section>
 
-    <button id="add-btn" type="button">Add a dot</button>
-    <p id="dot-note">Each dot represents a student</p>
+    <button id="add-btn" type="button" data-i18n="add">Add a dot</button>
+    <p id="dot-note" data-i18n="note">Each dot represents a student</p>
   </div>
 </main>
 
@@ -43,38 +52,38 @@
   <div class="modal-backdrop" data-close></div>
   <form id="add-form" class="sheet" novalidate>
     <div class="sheet-head">
-      <h2>Add your dot</h2>
+      <h2 data-i18n="formTitle">Add your dot</h2>
       <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
     </div>
 
     <label>
-      Name or nickname
+      <span data-i18n="fName">Name or nickname</span>
       <input id="f-name" name="name" type="text" autocomplete="off" maxlength="40" required />
     </label>
 
     <label>
-      Country
+      <span data-i18n="fCountry">Country</span>
       <input id="f-country" name="country" type="text" list="country-list"
-             autocomplete="off" placeholder="Start typing…" required />
+             autocomplete="off" data-i18n-ph="countryPlaceholder" required />
       <datalist id="country-list"></datalist>
-      <small id="f-country-err" class="err" hidden>Pick a country from the list.</small>
+      <small id="f-country-err" class="err" data-i18n="fCountryErr" hidden>Pick a country from the list.</small>
     </label>
 
     <label>
-      City <span class="opt">(optional)</span>
+      <span data-i18n="fCity">City</span> <span class="opt" data-i18n="fCityOpt">(optional)</span>
       <input id="f-city" name="city" type="text" list="city-list"
-             autocomplete="off" placeholder="Pick your country first" disabled />
+             autocomplete="off" data-i18n-ph="cityDisabled" disabled />
       <datalist id="city-list"></datalist>
     </label>
 
     <label>
-      One line about the USTP
+      <span data-i18n="fText">One line about the USTP</span>
       <textarea id="f-text" name="text" rows="2" maxlength="120" required
-                placeholder="What do you like most about it?"></textarea>
+                data-i18n-ph="textPlaceholder"></textarea>
       <small class="count-hint"><span id="f-text-count">0</span>/120</small>
     </label>
 
-    <button type="submit" class="submit-btn">Add my dot</button>
+    <button type="submit" class="submit-btn" data-i18n="submit">Add my dot</button>
   </form>
 </div>
 

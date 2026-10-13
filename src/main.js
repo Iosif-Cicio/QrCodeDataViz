@@ -1,30 +1,61 @@
 // ---------------------------------------------------------------------------
-// Wires the globe + DOM: live count, the post text (typewriter), the progress
-// indicator, and the Add-a-dot form. New submissions are pushed into the live
-// `posts` array and the globe jumps to them.
+// Wires the globe + DOM: language toggle, live count in the title, the post
+// text (typewriter), the progress indicator, and the Add-a-dot form.
 // ---------------------------------------------------------------------------
 
 import { createGlobe } from "./globe.js";
 import { posts as seedPosts } from "./posts.js";
 import { setupForm } from "./form.js";
+import { language, t } from "./translations.js";
 
 // live, mutable list (seeds now; Supabase + 100 defaults later)
 const posts = [...seedPosts];
 
 // --- DOM refs ---
 const canvas = document.getElementById("globe");
-const countEl = document.getElementById("count");
+const titleEl = document.getElementById("title");
 const postEl = document.getElementById("post");
 const authorEl = document.getElementById("post-author");
 const countryEl = document.getElementById("post-country");
 const textEl = document.getElementById("post-text");
 const progressEl = document.getElementById("progress");
 const addBtn = document.getElementById("add-btn");
+const langEl = document.getElementById("lang");
 
-// --- live count in the title ---
-function updateCount() {
-  countEl.textContent = String(posts.length);
+// --- i18n ---
+function renderTitle() {
+  // keep the live count inside the translated title
+  titleEl.innerHTML = t("title").replace(
+      "{n}",
+      `<span id="count">${posts.length}</span>`
+  );
 }
+
+function applyLang() {
+  renderTitle();
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-ph]").forEach((el) => {
+    el.setAttribute("placeholder", t(el.dataset.i18nPh));
+  });
+  if (form) form.applyLang();
+}
+
+function setLang(l) {
+  language.lang = l;
+  langEl.dataset.lang = l;
+  langEl.querySelector(".lang-label.de").classList.toggle("active", l === "de");
+  langEl.querySelector(".lang-label.en").classList.toggle("active", l === "en");
+  document.documentElement.lang = l;
+  applyLang();
+}
+
+langEl.querySelector(".lang-switch").addEventListener("click", () =>
+    setLang(language.lang === "en" ? "de" : "en")
+);
+langEl.querySelector(".lang-label.de").addEventListener("click", () => setLang("de"));
+langEl.querySelector(".lang-label.en").addEventListener("click", () => setLang("en"));
 
 // --- typewriter (cancellable; bails if the globe moved on) ---
 let typeTimer = null;
@@ -93,12 +124,12 @@ const globe = createGlobe(canvas, posts, hooks);
 // --- Add-a-dot: push into the live list, then jump to show it off ---
 const form = setupForm((post) => {
   posts.push(post);
-  updateCount();
+  renderTitle();
   globe.jumpTo(posts.length - 1); // the new dot becomes the next story
 });
 addBtn.addEventListener("click", form.open);
 
 // --- go ---
-updateCount();
+applyLang();
 renderProgress(0);
 globe.start();
