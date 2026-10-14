@@ -83,31 +83,39 @@ function typeText(str, el, isCurrent, speed = 28) {
   });
 }
 
-// --- progress indicator: dots when few, bar + counter when many ---
-const DOT_LIMIT = 12;
+// --- progress indicator
+const PAGE = 12;
+let batchStart = 0;
+
+function windowIndices() {
+  const n = posts.length;
+  const len = Math.min(PAGE, n);
+  const out = [];
+  for (let k = 0; k < len; k++) out.push((batchStart + k) % n); // wrap at the end
+  return out;
+}
+
 function renderProgress(activeIndex = -1) {
   progressEl.innerHTML = "";
-  if (posts.length <= DOT_LIMIT) {
-    posts.forEach((_, i) => {
-      const b = document.createElement("button");
-      b.className = "dot" + (i === activeIndex ? " active" : "");
-      b.type = "button";
-      b.setAttribute("aria-label", `Story ${i + 1}`);
-      b.addEventListener("click", () => globe.jumpTo(i));
-      progressEl.appendChild(b);
-    });
-  } else {
-    const bar = document.createElement("div");
-    bar.className = "bar";
-    const fill = document.createElement("span");
-    const pct = activeIndex < 0 ? 0 : ((activeIndex + 1) / posts.length) * 100;
-    fill.style.width = pct + "%";
-    bar.appendChild(fill);
-    const counter = document.createElement("span");
-    counter.className = "counter";
-    counter.textContent = `${activeIndex + 1} / ${posts.length}`;
-    progressEl.append(bar, counter);
+  const n = posts.length;
+  if (n === 0) return;
+
+  let win = windowIndices();
+  // active fell outside the window (advanced past it, jumped, or a new quote) ->
+  // open a fresh window starting at the active post
+  if (activeIndex >= 0 && !win.includes(activeIndex)) {
+    batchStart = activeIndex;
+    win = windowIndices();
   }
+
+  win.forEach((gi) => {
+    const b = document.createElement("button");
+    b.className = "dot" + (gi === activeIndex ? " active" : "");  // only current is blue
+    b.type = "button";
+    b.setAttribute("aria-label", `Story ${gi + 1}`);
+    b.addEventListener("click", () => globe.jumpTo(gi));
+    progressEl.appendChild(b);
+  });
 }
 
 const postHeadEl = document.querySelector(".post-head");
@@ -136,8 +144,7 @@ const globe = createGlobe(canvas, posts, hooks);
 // -AddBtn
 const form = setupForm((post) => {
   posts.push(post);
-  renderTitle();
-  globe.jumpTo(posts.length - 1); // the new dot becomes the next story
+  renderTitle();   // live count ticks up; its dot shows on the globe immediately
 });
 addBtn.addEventListener("click", form.open);
 
