@@ -1,11 +1,3 @@
-// ---------------------------------------------------------------------------
-// The "Quote Wall" overlay: every quote as a flex-wrapped card grid that
-// scrolls vertically. Filters by region (continent), by country (only the
-// countries that actually appear), and a free-text name search. Region and
-// country use the same custom combobox as the Add-quote form. Rebuilt from the
-// live `posts` array each time it opens, so new submissions show up.
-// ---------------------------------------------------------------------------
-
 import { continentOf } from "./geo.js";
 import { combobox } from "./combobox.js";
 import { t } from "./translations.js";

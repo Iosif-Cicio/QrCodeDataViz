@@ -1,18 +1,35 @@
-/* ---- Design tokens ---- */
+/* =========================================================================
+   quick legend for the names used:
+     #globe     the 3D canvas globe (full screen, behind everything)
+     #topbar    the bar up top: brand logo (#brand) + language toggle (#lang)
+     #lang      the DE/EN switch — data-lang="de"/"en" slides the .knob
+     #app       the UI column layered over the globe (title, quote, buttons)
+     #post      the current student's quote (.post-author, .chip, .post-text)
+     #progress  the row of dots showing where we are in the loop
+     .pill-btn  the "Add quote" / "Quote Wall" buttons
+     .wall      the Quote Wall overlay (.wall-filters + .wall-grid of .quote-card)
+     .sheet     the add-quote form that slides up from the bottom
+     .combo     a custom dropdown (country / city) with a round toggle
+   shorthand:
+     veil  = the faint translucent panel behind text
+     chip  = the small country tag next to a name
+   ========================================================================= */
+
+/* ---- design tokens ---- */
 :root {
-  --bg: #e9eff4;          /* USTP light-blue surface (HSL 201/41/93) */
-  --ink: #16293b;         /* deep navy text */
-  --muted: #5b6b7b;       /* cool grey */
-  --accent: #0074cc;      /* USTP blue — chip, toggle, button, active dot */
-  --ocean: #f1f6fb;       /* globe disc, a touch lighter than the page */
-  --country: #ffffff;     /* idle country fill */
-  --country-line: #cdd9e4;/* cool hairline border */
-  --dot: #a8b6c4;         /* idle student dot (cool grey) */
-  --dot-active: #0074cc;  /* active post's dot (USTP blue, pops on the gold glow) */
+  --bg: #e9eff4;
+  --ink: #16293b;
+  --muted: #5b6b7b;
+  --accent: #0074cc;      /* brand blue: chip, toggle, button, active dot */
+  --ocean: #f1f6fb;
+  --country: #ffffff;
+  --country-line: #cdd9e4;
+  --dot: #a8b6c4;
+  --dot-active: #0074cc;
   --font-serif: Georgia, "Times New Roman", serif;
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --veil: rgba(255, 255, 255, 0.4);  /* translucent backing behind text blocks */
-  --error: #c0392b;       /* required-field error red */
+  --veil: rgba(255, 255, 255, 0.4);   /* translucent backing behind text */
+  --error: #c0392b;
 }
 
 * { box-sizing: border-box; }
@@ -28,7 +45,7 @@ html, body {
 
 body { overflow: hidden; }
 
-/* ---- Globe fills the whole screen ---- */
+/* ---- globe fills the whole screen ---- */
 #globe {
   position: fixed;
   inset: 0;
@@ -36,10 +53,10 @@ body { overflow: hidden; }
   height: 100dvh;
   display: block;
   z-index: 0;
-  touch-action: none;        /* so dragging the globe doesn't scroll */
+  touch-action: none;        /* so dragging the globe doesn't scroll the page */
 }
 
-/* ---- Top bar: brand centred, language toggle pinned right ---- */
+/* ---- top bar: brand left, language toggle right ---- */
 #topbar {
   position: fixed;
   top: 0;
@@ -48,7 +65,7 @@ body { overflow: hidden; }
   z-index: 5;
   display: flex;
   align-items: center;
-  justify-content: flex-start;      /* mobile: brand on the left */
+  justify-content: flex-start;
   padding: 12px 24px;
   background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(8px);
@@ -60,6 +77,7 @@ body { overflow: hidden; }
 #brand { display: block; }
 #brand img { height: 40px; display: block; }
 
+/* web: align brand/toggle to the globe's edges */
 @media (min-width: 768px) {
   #topbar { padding-left: 0; }
   #brand { margin-left: max(24px, calc(50vw - 47dvh - 40px)); }
@@ -102,10 +120,10 @@ body { overflow: hidden; }
   background: var(--accent);
   transition: left 0.18s ease;
 }
-#lang[data-lang="de"] .knob { left: 2px; }
-#lang[data-lang="en"] .knob { left: 22px; }
+#lang[data-lang="de"] .knob { left: 2px; }   /* knob slides left for DE */
+#lang[data-lang="en"] .knob { left: 22px; }  /* right for EN */
 
-/* ---- Overlaid UI column ---- */
+/* ---- overlaid UI column ---- */
 #app {
   position: relative;
   z-index: 1;
@@ -121,7 +139,7 @@ body { overflow: hidden; }
 #app button,
 #app #progress { pointer-events: auto; }  /* ...except the controls */
 
-/* Header (constant, centred over the north pole) */
+/* header stays put over the top of the globe */
 #head {
   flex: 0 0 auto;
   text-align: center;
@@ -137,7 +155,7 @@ body { overflow: hidden; }
 }
 
 #intro-text {
-  margin: 0 auto;            /* centre the narrow paragraph under the title */
+  margin: 0 auto;
   font-size: clamp(0.85rem, 2.4vw, 0.95rem);
   line-height: 1.5;
   color: var(--muted);
@@ -148,8 +166,7 @@ body { overflow: hidden; }
   border-radius: 12px;
 }
 
-/* Bottom block (progress + post + button) — lifted so the tweet overlaps
-   the lower globe instead of sitting on empty space */
+/* bottom block lifted so the quote overlaps the lower globe */
 #bottom {
   flex: 0 0 auto;
   margin-bottom: 6vh;
@@ -182,36 +199,15 @@ body { overflow: hidden; }
   background: var(--country-line);
   cursor: pointer;
   transition: background 0.3s ease, transform 0.3s ease;
-} /* played -> blue */
+}
 #progress .dot.active {
   background: var(--accent);
-  transform: scale(1.2);                                     /* current -> bigger */
+  transform: scale(1.2);     /* current one bigger + blue */
 }
 
-/* many posts -> compact bar + counter instead of 100 dots */
-#progress .bar {
-  flex: 1 1 auto;
-  height: 3px;
-  background: var(--country-line);
-  border-radius: 2px;
-  overflow: hidden;
-}
-#progress .bar > span {
-  display: block;
-  height: 100%;
-  background: var(--accent);
-  transition: width 0.4s ease;
-}
-#progress .counter {
-  flex: 0 0 auto;
-  font-size: 0.75rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ---- Post (left-aligned) ---- */
+/* ---- post (left-aligned) ---- */
 #post {
-  min-height: 4.8em;         /* reserve space so typing doesn't shift layout */
+  min-height: 4.8em;         /* reserve space so typing doesn't shift the layout */
 }
 
 .post-head {
@@ -236,7 +232,7 @@ body { overflow: hidden; }
   text-transform: uppercase;
   padding: 3px 8px;
 }
-.chip:empty { display: none; }
+.chip:empty { display: none; }   /* hide it when there's no country yet */
 
 .post-text {
   font-family: var(--font-serif);
@@ -245,6 +241,7 @@ body { overflow: hidden; }
   margin: 0;
 }
 
+/* blinking typewriter caret */
 .post-text::after {
   content: "";
   display: inline-block;
@@ -257,7 +254,7 @@ body { overflow: hidden; }
 }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* ---- "Each dot represents a student" caption (pinned bottom-right of screen) ---- */
+/* "each dot represents a student" caption, pinned bottom-right */
 #dot-note {
   position: fixed;
   right: 24px;
@@ -282,7 +279,7 @@ body { overflow: hidden; }
 }
 .pill-btn {
   padding: 11px 20px;
-  flex: 1;
+  flex: 1;                   /* the two buttons split the row evenly */
   border: 1px solid var(--country-line);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.55);
@@ -297,7 +294,7 @@ body { overflow: hidden; }
 .pill-btn:hover { background: rgba(255, 255, 255, 0.85); }
 .pill-btn:active { transform: translateY(1px); }
 
-/* ---- Quote Wall overlay ---- */
+/* ---- quote wall overlay ---- */
 .wall {
   position: fixed;
   inset: 0;
@@ -329,13 +326,12 @@ body { overflow: hidden; }
   color: var(--muted);
 }
 
-/* body holds the filter bar + the scrolling grid. Column on mobile (filters
-   on top, horizontal), row on web (filters as a left sidebar, vertical). */
+/* filters on top (mobile) / left sidebar (web), then the scrolling grid */
 .wall-body {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  min-height: 0;            /* let the grid actually scroll */
+  min-height: 0;             /* let the grid actually scroll */
 }
 
 .wall-filters {
@@ -381,7 +377,7 @@ body { overflow: hidden; }
 .quote-card {
   display: flex;
   flex-direction: column;
-  margin: 0;
+  margin: 0;                 /* kill the default <figure> margin */
   background: #fff;
   border-radius: 4px;
   padding: 16px;
@@ -394,13 +390,14 @@ body { overflow: hidden; }
   color: var(--ink);
 }
 .quote-card figcaption {
-  margin-top: auto;
+  margin-top: auto;          /* caption sits at the bottom of the card */
   font-size: 0.7rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
+/* first quote shown bigger */
 .quote-card.featured { background: var(--ocean); }
 .quote-card.featured blockquote {
   font-size: clamp(1.4rem, 5.5vw, 1.8rem);
@@ -408,7 +405,7 @@ body { overflow: hidden; }
   margin-bottom: 14px;
 }
 
-/* Web view: horizontal filters + dense tile grid, first quote featured 2×2 */
+/* web: horizontal filters + tile grid, first quote spans 2x2 */
 @media (min-width: 768px) {
   .wall-filters {
     flex-direction: row;
@@ -420,12 +417,12 @@ body { overflow: hidden; }
 
   .wall-grid {
     grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-    grid-auto-rows: auto;      /* rows grow to fit the tallest card — no clipping */
+    grid-auto-rows: auto;      /* rows grow to the tallest card, no clipping */
     gap: 6px;
   }
   .quote-card {
     padding: 14px 16px;
-    min-height: 8rem;          /* uniform floor; taller quotes grow their row */
+    min-height: 8rem;          /* keeps short cards a uniform size */
   }
   .quote-card.featured {
     grid-column: span 2;
@@ -436,7 +433,7 @@ body { overflow: hidden; }
   }
 }
 
-/* ---- Modal / bottom sheet ---- */
+/* ---- add-quote bottom sheet ---- */
 .modal { position: fixed; inset: 0; z-index: 50; }
 .modal[hidden] { display: none; }
 
@@ -526,6 +523,7 @@ body { overflow: hidden; }
 .sheet input:disabled { background: #e8eef4; color: #9aa7b3; }
 .sheet textarea { resize: none; }
 
+/* red outline on empty required fields */
 .sheet input.error,
 .sheet textarea.error { border-color: var(--error); }
 .sheet input.error:focus,
@@ -543,7 +541,7 @@ body { overflow: hidden; }
 .combo { position: relative; }
 .combo input { padding-right: 42px; }      /* room for the toggle */
 
-/* round toggle button with the triangle (flips up when open) */
+/* round toggle with the triangle (flips up when open) */
 .combo-toggle {
   position: absolute;
   right: 6px;
@@ -560,15 +558,16 @@ body { overflow: hidden; }
   border-radius: 50%;
   color: var(--muted);
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;   /* no square flash on mobile tap */
+  -webkit-tap-highlight-color: transparent;   /* no square flash on tap */
   transition: background 0.15s ease;
 }
-.combo-toggle:active { background: rgba(0, 116, 204, 0.18); }  /* faint circle */
+.combo-toggle:active { background: rgba(0, 116, 204, 0.18); }
 .combo-toggle svg { transition: transform 0.2s ease; }
-.combo.open .combo-toggle svg { transform: rotate(180deg); }   /* points up when open */
+.combo.open .combo-toggle svg { transform: rotate(180deg); }
 .combo input:disabled ~ .combo-toggle { opacity: 0.4; cursor: default; }
 .combo input:disabled ~ .combo-toggle:hover { background: none; }
 
+/* dropdown list under the input */
 .combo-list {
   position: absolute;
   top: calc(100% + 4px);

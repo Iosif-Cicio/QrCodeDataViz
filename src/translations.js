@@ -1,9 +1,3 @@
-// ---------------------------------------------------------------------------
-// UI strings in English + German. The DE/EN toggle switches language.lang and
-// the page re-renders. Student tweets are left as written (not translated).
-// {n} in the title is replaced with the live student count.
-// ---------------------------------------------------------------------------
-
 export const translations = {
     en: {
         title: "What {n} students say about <br> FH Gänsendorf",

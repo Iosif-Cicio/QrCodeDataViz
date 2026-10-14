@@ -1,18 +1,31 @@
 // ---------------------------------------------------------------------------
-// The globe. Canvas orthographic projection (adapted from the D3 example).
+// The globe. A D3 orthographic (round) projection drawn on a <canvas>.
 //
-// Each post is a dot. When a post is active the globe rotates it to centre,
-// its country glows (inner edge-glow, Anthropic "81k" style) and that country's
-// dots turn gold; all other dots stay grey. The text itself is shown by the DOM
-// layer below the globe (hooks.onArrive).
+// What it does: shows every student as a dot. On playback it loops through them,
+// rotating to each one's country, zooming in, glowing the country and enlarging
+// that dot, while the DOM layer below types out the quote.
 //
-// `posts` is a LIVE array — main.js pushes new submissions into it and calls
-// jumpTo(newIndex) so the new dot becomes the next story.
+// Key names:
+//   posts        LIVE array of students {name, country, lat, lng, text}. main.js
+//                owns it and pushes new submissions in.
+//   hooks        callbacks into the UI: onHeader(p,i) sets name+country,
+//                onArrive(p,i,...) types the quote once the globe arrives.
+//   activeIndex  which post is currently highlighted (-1 = none / travelling).
+//   seq          a counter that cancels an older move when a new one starts.
+//
+// Bits to tweak:
+//   HOLD_MS            how long each quote stays before advancing (ms)
+//   HOME_ROTATE        the starting view ([lng, lat])
+//   BASE_SCALE_FACTOR  globe size vs. screen (bigger = larger globe)
+//   targetZoom         (in showPost) how far it zooms into each country
+//   dotRadius()        dot size; auto-shrinks as more students are added
+//   SENS               drag-to-spin sensitivity
 // ---------------------------------------------------------------------------
 
 import * as d3 from "d3";
-import countries from "./countries.geo.json";
+import countries from "./data/countries.geo.json";
 
+// pull the palette from the CSS tokens so JS and CSS never drift apart
 const css = getComputedStyle(document.documentElement);
 const COL = {
   ocean: css.getPropertyValue("--ocean").trim() || "#f1f6fb",
@@ -30,9 +43,9 @@ function hexToRgb(hex) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 const [AR, AG, AB] = hexToRgb(COL.accent);
-const accentA = (a) => `rgba(${AR}, ${AG}, ${AB}, ${a})`;
+const accentA = (a) => `rgba(${AR}, ${AG}, ${AB}, ${a})`;   // accent at any opacity
 
-const HOLD_MS = 4200; // how long each story holds before advancing
+const HOLD_MS = 4200;
 
 export function createGlobe(canvas, posts, hooks = {}) {
   const ctx = canvas.getContext("2d");
@@ -42,13 +55,14 @@ export function createGlobe(canvas, posts, hooks = {}) {
   const path = d3.geoPath(projection, ctx);
 
   const BASE_SCALE_FACTOR = 0.46;
-  const HOME_ROTATE = [-12, -48]; // facing Europe
+  const HOME_ROTATE = [-12, -48];   // start facing Europe
   projection.rotate(HOME_ROTATE);
 
   let baseScale = 100;
   let zoom = 1;
   let activeCountry = null;
 
+  // size the canvas to the screen (and to the device pixel ratio for sharpness)
   function resize() {
     dpr = window.devicePixelRatio || 1;
     width = canvas.clientWidth;
@@ -68,13 +82,13 @@ export function createGlobe(canvas, posts, hooks = {}) {
 
     const r = projection.scale();
 
-    // globe disc (soft ocean)
+    // ocean disc
     ctx.beginPath();
     ctx.arc(width / 2, height / 2, r, 0, 2 * Math.PI);
     ctx.fillStyle = COL.ocean;
     ctx.fill();
 
-    // graticule
+    // grid lines
     ctx.beginPath();
     path(d3.geoGraticule10());
     ctx.strokeStyle = COL.line;
@@ -83,7 +97,7 @@ export function createGlobe(canvas, posts, hooks = {}) {
     ctx.stroke();
     ctx.globalAlpha = 1;
 
-    // countries (white fill + faint border)
+    // countries
     let activeFeature = null;
     countries.features.forEach((f) => {
       if (f.properties.name === activeCountry) activeFeature = f;
@@ -98,15 +112,14 @@ export function createGlobe(canvas, posts, hooks = {}) {
 
     if (activeFeature) drawCountryGlow(activeFeature);
 
-    // student dots — radius shrinks as more students are added so the map stays
-    // readable at 1000+. Draw the inactive (grey) dots first, then the active one
-    // on top, bigger, so it never gets covered (canvas has no z-index).
+    // student dots: grey ones first, then the active one on top (bigger), so it
+    // never gets covered — canvas has no z-index, paint order is the layering
     const dotR = dotRadius();
     let activePt = null;
     posts.forEach((p, idx) => {
       if (!isVisible(p.lng, p.lat)) return;
       if (idx === activeIndex) {
-        activePt = projection([p.lng, p.lat]); // defer — paint it last
+        activePt = projection([p.lng, p.lat]);   // save it, paint last
         return;
       }
       const [x, y] = projection([p.lng, p.lat]);
@@ -118,17 +131,19 @@ export function createGlobe(canvas, posts, hooks = {}) {
     if (activePt) {
       const [x, y] = activePt;
       ctx.beginPath();
-      ctx.arc(x, y, Math.max(3, dotR + 1.5), 0, 2 * Math.PI); // keep the highlight big
+      ctx.arc(x, y, Math.max(3, dotR + 1.5), 0, 2 * Math.PI);
       ctx.fillStyle = COL.dotActive;
       ctx.fill();
     }
   }
 
+  // dot size shrinks as the student count grows (clamped): ~2.2px small, ~1 at 1000
   function dotRadius() {
     const n = posts.length || 1;
     return Math.max(1, Math.min(2.2, 6.4 / Math.pow(n, 0.3)));
   }
 
+  // inner glow on the active country (Anthropic "81k" style)
   function drawCountryGlow(f) {
     ctx.save();
     ctx.beginPath();
@@ -152,12 +167,13 @@ export function createGlobe(canvas, posts, hooks = {}) {
     ctx.restore();
   }
 
+  // is this point on the near side of the globe (not behind it)?
   function isVisible(lng, lat) {
     const c = projection.rotate();
     return d3.geoDistance([lng, lat], [-c[0], -c[1]]) < Math.PI / 2;
   }
 
-  // ----- animation -----
+  // ----- animation: ease the globe to a rotation + zoom over `ms` -----
   function animateTo(targetRotate, targetZoom, ms = 1400) {
     return new Promise((resolve) => {
       const rInterp = d3.interpolate(projection.rotate(), targetRotate);
@@ -180,37 +196,37 @@ export function createGlobe(canvas, posts, hooks = {}) {
   // ----- playback -----
   let running = false;
   let current = 0;
-  let seq = 0;        // guards against overlapping transitions (e.g. a jump)
+  let seq = 0;        // bumped on every move; an old move bails when it's stale
   let timer = null;
   let activeIndex = -1;
 
   async function showPost(i) {
     const token = ++seq;
     const p = posts[i];
-    const targetZoom = 1.5; // same zoom for every story
+    const targetZoom = 1.5;   // same zoom for every story
 
-    // 1. swap the header to the new author + country, clear the old message
+    // 1. header shows the new name + country, old quote cleared
     if (hooks.onHeader) hooks.onHeader(p, i);
 
-    // un-highlight the previous dot / country while the globe travels
+    // un-highlight while the globe travels
     activeCountry = null;
     activeIndex = -1;
 
-    // 2. move to the new country
+    // 2. fly to the country
     await animateTo([-p.lng, -p.lat], targetZoom, 1400);
-    if (token !== seq) return; // superseded by a newer navigation
+    if (token !== seq) return;   // a newer move started — stop
 
-    // 3. highlight the new dot + glow its country
+    // 3. highlight the dot + glow the country
     activeCountry = p.country;
     activeIndex = i;
     draw();
 
-    // 4. now in position — type the message
+    // 4. in position — type the quote
     if (hooks.onArrive) await hooks.onArrive(p, i, token, () => token === seq);
   }
 
   async function playFrom(i) {
-    current = ((i % posts.length) + posts.length) % posts.length;
+    current = ((i % posts.length) + posts.length) % posts.length;   // wrap around
     await showPost(current);
     scheduleNext();
   }
@@ -222,7 +238,7 @@ export function createGlobe(canvas, posts, hooks = {}) {
   }
 
   function start() {
-    if (running) return;
+    if (running) return;   // don't start a second loop
     running = true;
     playFrom(0);
   }
@@ -230,22 +246,21 @@ export function createGlobe(canvas, posts, hooks = {}) {
   function stop() {
     running = false;
     clearTimeout(timer);
-    seq++; // cancel any in-flight typing
+    seq++;   // cancel any in-flight typing
   }
 
-  // jump to a post and keep the loop going from there
+  // jump to a post (e.g. a progress dot click) and keep looping from there
   function jumpTo(i) {
     clearTimeout(timer);
     running = true;
     playFrom(i);
   }
 
-  // current token still valid? (for the typewriter to bail on a jump)
   function isCurrent(token) {
     return token === seq;
   }
 
-  // ----- drag to spin (live demo) -----
+  // ----- drag to spin -----
   const SENS = 75;
   d3.select(canvas).call(
       d3.drag().on("drag", (e) => {

@@ -1,11 +1,11 @@
 // ---------------------------------------------------------------------------
-// The "Add a dot" modal: name, country (picked from the GeoJSON names), an
-// optional city (autocompleted + dotted on its real coordinates), and a tweet.
-// onSubmit receives a ready-to-use post: { name, country, city, lat, lng, text }.
+// The add-quote bottom sheet. Collects name, country, an optional city and a
+// 120-char quote, validates the required fields, then hands a ready-to-use post
+// to onSubmit: { name, country, city, lat, lng, text }.
 //
-// Country/city use a small custom combobox instead of <datalist>, because the
-// native one filters by the field's value and won't reopen the full list once
-// something is picked.
+// Country and city use the shared combobox (see combobox.js). If a city is
+// chosen the dot sits on its real coordinates, otherwise on the country centre.
+//
 // ---------------------------------------------------------------------------
 
 import { countryList, resolveCountry, citySuggestions, findCity } from "./geo.js";
@@ -33,66 +33,7 @@ export function setupForm(onSubmit) {
         }
     }
 
-    // --- tiny custom combobox ---
-    // getOptions(query) -> array of strings; onPick runs after a value is set.
-    function combobox(input, listEl, getOptions, onPick) {
-        const combo = input.parentElement; // the .combo wrapper
-
-        // round toggle button with a triangle (CSS flips it up when open)
-        const toggle = document.createElement("button");
-        toggle.type = "button";
-        toggle.className = "combo-toggle";
-        toggle.setAttribute("aria-label", "Toggle list");
-        toggle.innerHTML =
-            '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">' +
-            '<path d="M1 3 L9 3 L5 8 Z" fill="currentColor"/></svg>';
-        combo.appendChild(toggle);
-
-        function render(query) {
-            const items = getOptions(query);
-            listEl.innerHTML = items
-                .map((o) => `<li role="option">${o}</li>`)
-                .join("");
-            listEl.hidden = items.length === 0;
-            combo.classList.toggle("open", !listEl.hidden);
-        }
-        const hide = () => {
-            listEl.hidden = true;
-            combo.classList.remove("open");
-        };
-
-        input.addEventListener("focus", () => render(""));        // show the full list
-        input.addEventListener("input", () => {
-            render(input.value);
-            if (onPick) onPick();
-        });
-        // mousedown (not click) so the value is set before the input's blur fires
-        listEl.addEventListener("mousedown", (e) => {
-            const li = e.target.closest("li");
-            if (!li) return;
-            e.preventDefault();
-            input.value = li.textContent;
-            hide();
-            if (onPick) onPick();
-        });
-        input.addEventListener("blur", () => setTimeout(hide, 150));
-
-        // caret button toggles the list open/closed
-        toggle.addEventListener("mousedown", (e) => {
-            e.preventDefault(); // don't steal focus / trigger the input blur
-            if (input.disabled) return;
-            if (listEl.hidden) {
-                input.focus();
-                render("");
-            } else {
-                hide();
-            }
-        });
-
-        return { hide };
-    }
-
-    // Country: filter the GeoJSON names.
+    // country picker: filter the country names
     const countryNames = countryList.map((c) => c.name);
     function countryOptions(query) {
         const q = query.trim().toLowerCase();
@@ -102,13 +43,13 @@ export function setupForm(onSubmit) {
         return list.slice(0, 80);
     }
 
-    // City: depends on the chosen country.
+    // city picker: cities of the chosen country
     function cityOptions(query) {
         const country = resolveCountry(countryEl.value);
         return country ? citySuggestions(country.iso2, query) : [];
     }
 
-    // Enable/disable the city field and set its placeholder based on the country.
+    // enable the city field only once a valid country is picked
     function syncCity() {
         const country = resolveCountry(countryEl.value);
         if (country) {
@@ -126,7 +67,7 @@ export function setupForm(onSubmit) {
     combobox(countryEl, countryListEl, countryOptions, syncCity);
     combobox(cityEl, cityListEl, cityOptions);
 
-    // live char counter + clear the error state as the user fixes things
+    // live char counter + clear errors as the user fixes fields
     textEl.addEventListener("input", () => {
         textCount.textContent = String(textEl.value.length);
         clearError(textEl);
@@ -153,7 +94,7 @@ export function setupForm(onSubmit) {
         const name = nameEl.value.trim();
         const text = textEl.value.trim();
 
-        // mark any empty/invalid required field red; turn the "Required" note red+bold
+        // flag any empty required field red; stop if there are any
         const invalid = [];
         if (!name) invalid.push(nameEl);
         if (!country) invalid.push(countryEl);
@@ -166,6 +107,7 @@ export function setupForm(onSubmit) {
             return;
         }
 
+        // dot on the city if one was matched, otherwise the country centre
         const cityName = cityEl.value.trim();
         const cityHit = cityName ? findCity(country.iso2, cityName) : null;
         const lat = cityHit ? cityHit.lat : country.lat;
@@ -179,7 +121,7 @@ export function setupForm(onSubmit) {
         close();
     });
 
-    // re-apply language to the dynamic city placeholder
+    // the city placeholder is dynamic, so re-run it on a language switch
     function applyLang() {
         syncCity();
     }

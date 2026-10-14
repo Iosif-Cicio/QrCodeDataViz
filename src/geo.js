@@ -1,14 +1,20 @@
 // ---------------------------------------------------------------------------
-// Country + city helpers.
-//   - countryList: every country from the GeoJSON, with its ISO2 code and a
-//     centroid (used as the dot position when no city is given).
-//   - findCity: look up a city within a country (from the bundled cities.json)
-//     so a chosen city dots on its real coordinates.
+// Country + city lookups. Backs the add-quote form (country/city pickers) and
+// the Quote Wall region filter. Everything is read from two bundled files:
+// countries.geo.json (shapes) and cities.json (city coordinates).
+//
+// Exports:
+//   countryList       every country {name, iso2, lng, lat} — lat/lng is the
+//                     country's centre, used as the dot when no city is given
+//   resolveCountry    typed text -> a known country (or null)
+//   continentOf       country name -> its continent (for the region filter)
+//   citySuggestions   city-name autocomplete within a country
+//   findCity          a city's real {lat, lng} within a country (or null)
 // ---------------------------------------------------------------------------
 
 import * as d3 from "d3";
-import countries from "./countries.geo.json";
-import cities from "./cities.json"; // [{ n, c, lat, lng }] — c = ISO2
+import countries from "./data/countries.geo.json";
+import cities from "./data/cities.json"; // [{ n, c, lat, lng }] — c = ISO2 code
 
 export const countryList = countries.features
     .map((f) => {
@@ -20,13 +26,11 @@ export const countryList = countries.features
 
 const byName = new Map(countryList.map((c) => [c.name.toLowerCase(), c]));
 
-// Resolve a typed country string to a known country (exact, else case-insensitive).
 export function resolveCountry(input) {
     if (!input) return null;
     return byName.get(input.trim().toLowerCase()) || null;
 }
 
-// Continent (region) for a country name — used by the Quote Wall region filter.
 const continentByCountry = new Map(
     countries.features.map((f) => [f.properties.name, f.properties.continent])
 );
@@ -34,14 +38,14 @@ export function continentOf(name) {
     return continentByCountry.get(name) || "Other";
 }
 
-// Cities grouped by ISO2 for quick per-country autocomplete.
+// group cities by country so autocomplete only scans one country's list
 const citiesByIso = new Map();
 for (const city of cities) {
     if (!citiesByIso.has(city.c)) citiesByIso.set(city.c, []);
     citiesByIso.get(city.c).push(city);
 }
 
-// Up to `limit` city names in a country, optionally matching a typed prefix.
+// up to `limit` city names in a country, matching the typed text
 export function citySuggestions(iso2, query = "", limit = 40) {
     const list = citiesByIso.get(iso2) || [];
     const q = query.trim().toLowerCase();
@@ -55,7 +59,7 @@ export function citySuggestions(iso2, query = "", limit = 40) {
     return out;
 }
 
-// Exact-ish city lookup within a country; returns { lat, lng } or null.
+// exact match first, else first city that starts with the text
 export function findCity(iso2, name) {
     if (!name) return null;
     const list = citiesByIso.get(iso2) || [];
