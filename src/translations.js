@@ -6,9 +6,9 @@
 
 export const translations = {
     en: {
-        title: "What {n} students say about the USTP St.\u00a0Pölten",
+        title: "What {n} students say about <br> FH Gänsdorf",
         intro:
-            "Students from across Europe and beyond study at the University of Applied Sciences St.\u00a0Pölten. This is where they're from.",
+            "Students from across Europe and beyond study at FH Gänsdorf. This is where they're from.",
         note: "Each dot represents a student",
         formTitle: "Add your dot",
         fName: "Name or nickname*",
@@ -16,7 +16,7 @@ export const translations = {
         fCountryErr: "Pick a country from the list.",
         fCity: "City",
         fCityOpt: "(optional)",
-        fText: "One line about the USTP*",
+        fText: "One line about the FH Gänsdorf*",
         textPlaceholder: "What do you like most about it?",
         submit: "Submit quote",
         countryPlaceholder: "Start typing…",
@@ -32,9 +32,9 @@ export const translations = {
         searchName: "Search a name…",
     },
     de: {
-        title: "Was {n} Studierende über die USTP St.\u00a0Pölten sagen",
+        title: "Was {n} Studierende über die <br> FH Gänsdorf sagen",
         intro:
-            "Studierende aus ganz Europa und darüber hinaus studieren an der Fachhochschule St.\u00a0Pölten. Von hier kommen sie.",
+            "Studierende aus ganz Europa und darüber hinaus studieren an der FH Gänsdorf. Von hier kommen sie.",
         note: "Jeder Punkt steht für eine*n Studierende*n",
         formTitle: "Deinen Punkt hinzufügen",
         fName: "Name oder Spitzname*",
@@ -42,7 +42,7 @@ export const translations = {
         fCountryErr: "Bitte ein Land aus der Liste wählen.",
         fCity: "Stadt",
         fCityOpt: "(optional)",
-        fText: "Ein Satz über die USTP*",
+        fText: "Ein Satz über die FH Gänsdorf*",
         textPlaceholder: "Was gefällt dir am besten?",
         submit: "Eintrag bestätigen",
         countryPlaceholder: "Tippen…",

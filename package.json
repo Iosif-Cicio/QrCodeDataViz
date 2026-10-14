@@ -1,7 +1,7 @@
 {
-  "name": "ustp-global",
+  "name": "gaensdorf-world",
   "version": "0.1.0",
-  "description": "USTP's Global",
+  "description": "FH Gänsdorf World",
   "type": "module",
   "scripts": {
     "dev": "vite",
