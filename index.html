@@ -52,6 +52,7 @@
   </div>
 </main>
 
+<!-- Quote Wall overlay -->
 <div id="wall" class="wall" hidden>
   <div class="wall-head">
     <div class="wall-heading">
@@ -60,7 +61,24 @@
     </div>
     <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
   </div>
-  <div id="wall-grid" class="wall-grid"></div>
+
+  <div class="wall-body">
+    <div class="wall-filters">
+      <div class="combo">
+        <input id="wall-region" type="text" autocomplete="off"
+               aria-label="Region" data-t-ph="allRegions" />
+        <ul id="wall-region-list" class="combo-list" hidden></ul>
+      </div>
+      <div class="combo">
+        <input id="wall-country" type="text" autocomplete="off"
+               aria-label="Country" data-t-ph="allCountries" />
+        <ul id="wall-country-list" class="combo-list" hidden></ul>
+      </div>
+      <input id="wall-search" class="wall-search" type="search"
+             autocomplete="off" data-t-ph="searchName" />
+    </div>
+    <div id="wall-grid" class="wall-grid"></div>
+  </div>
 </div>
 
 <!-- Add-a-dot modal -->
@@ -80,7 +98,8 @@
     <label>
       <span data-t="fCountry">Country</span>
       <div class="combo">
-        <input id="f-country" name="country" type="text" autocomplete="off" data-t-ph="countryPlaceholder" required />
+        <input id="f-country" name="country" type="text"
+               autocomplete="off" data-t-ph="countryPlaceholder" required />
         <ul id="country-list" class="combo-list" hidden></ul>
       </div>
       <small id="f-country-err" class="err" data-t="fCountryErr" hidden>Pick a country from the list.</small>

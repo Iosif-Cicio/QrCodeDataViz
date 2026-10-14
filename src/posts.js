@@ -1,17 +1,3 @@
-// ---------------------------------------------------------------------------
-// Sample posts. Later these come from Supabase instead.
-//
-// Each post needs:
-//   name      - first name / nickname (shown publicly)
-//   country   - MUST match the `name` property in countries.geo.json
-//               (e.g. "Austria", "Germany", "United States of America")
-//   lat, lng  - where the dot sits. For Austrians use the city; for others
-//               a point inside their country is fine.
-//   text      - the one-liner about USTP
-//
-// The FIRST post is the anchor: Austria / St. Pölten.
-// ---------------------------------------------------------------------------
-
 export const posts = [
   {
     name: "Iosif",

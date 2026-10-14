@@ -270,6 +270,7 @@ body { overflow: hidden; }
 }
 
 .actions {
+  width: min(100%, 32rem);
   display: flex;
   justify-content: center;
   gap: 10px;
@@ -278,6 +279,7 @@ body { overflow: hidden; }
 }
 .pill-btn {
   padding: 11px 20px;
+  flex: 1;
   border: 1px solid var(--country-line);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.55);
@@ -324,20 +326,61 @@ body { overflow: hidden; }
   color: var(--muted);
 }
 
+/* body holds the filter bar + the scrolling grid. Column on mobile (filters
+   on top, horizontal), row on web (filters as a left sidebar, vertical). */
+.wall-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;            /* let the grid actually scroll */
+}
+
+.wall-filters {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--country-line);
+}
+
+.wall-filters .combo { width: 100%; }
+.wall-filters .combo input,
+.wall-search {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--country-line);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.wall-filters .combo input { padding-right: 42px; }  /* room for the toggle */
+.wall-filters .combo input:focus,
+.wall-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 .wall-grid {
   flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
-  padding: 20px 24px 48px;
-  columns: 17rem;            /* masonry-style columns */
-  column-gap: 14px;
+  padding: 12px 12px 24px;
+  display: grid;
+  grid-template-columns: 1fr;   /* single column on mobile */
+  align-content: start;
+  gap: 12px;
 }
 
 .quote-card {
-  break-inside: avoid;
-  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
   background: #fff;
-  border: 1px solid var(--country-line);
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 16px;
 }
 .quote-card blockquote {
@@ -348,10 +391,43 @@ body { overflow: hidden; }
   color: var(--ink);
 }
 .quote-card figcaption {
+  margin-top: auto;
   font-size: 0.7rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+.quote-card.featured { background: var(--ocean); }
+.quote-card.featured blockquote {
+  font-size: clamp(1.4rem, 5.5vw, 1.8rem);
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+
+/* Web view: horizontal filters + dense tile grid, first quote featured 2×2 */
+@media (min-width: 768px) {
+  .wall-filters {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .wall-filters .combo { width: 220px; }
+  .wall-search { width: 240px; margin-left: auto; }
+
+  .wall-grid {
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    grid-auto-rows: minmax(5.5rem, auto);
+    gap: 12px;
+  }
+  .quote-card { padding: 13px 15px; }
+  .quote-card.featured {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+  .quote-card.featured blockquote {
+    font-size: clamp(1.2rem, 1.5vw, 1.5rem);
+  }
 }
 
 /* ---- Modal / bottom sheet ---- */

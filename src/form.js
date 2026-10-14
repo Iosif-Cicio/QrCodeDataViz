@@ -10,6 +10,7 @@
 
 import { countryList, resolveCountry, citySuggestions, findCity } from "./geo.js";
 import { t } from "./translations.js";
+import { combobox } from "./combobox.js";
 
 export function setupForm(onSubmit) {
     const modal = document.getElementById("modal");

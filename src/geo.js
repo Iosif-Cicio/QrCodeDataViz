@@ -26,6 +26,14 @@ export function resolveCountry(input) {
     return byName.get(input.trim().toLowerCase()) || null;
 }
 
+// Continent (region) for a country name — used by the Quote Wall region filter.
+const continentByCountry = new Map(
+    countries.features.map((f) => [f.properties.name, f.properties.continent])
+);
+export function continentOf(name) {
+    return continentByCountry.get(name) || "Other";
+}
+
 // Cities grouped by ISO2 for quick per-country autocomplete.
 const citiesByIso = new Map();
 for (const city of cities) {
