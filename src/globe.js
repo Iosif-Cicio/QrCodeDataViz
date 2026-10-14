@@ -98,9 +98,10 @@ export function createGlobe(canvas, posts, hooks = {}) {
 
     if (activeFeature) drawCountryGlow(activeFeature);
 
-    // student dots — draw the inactive (grey) dots first, then the active one on
-    // top, so neighbouring dots never cover the highlighted one (canvas has no
-    // z-index; paint order is the layering).
+    // student dots — radius shrinks as more students are added so the map stays
+    // readable at 1000+. Draw the inactive (grey) dots first, then the active one
+    // on top, bigger, so it never gets covered (canvas has no z-index).
+    const dotR = dotRadius();
     let activePt = null;
     posts.forEach((p, idx) => {
       if (!isVisible(p.lng, p.lat)) return;
@@ -110,17 +111,22 @@ export function createGlobe(canvas, posts, hooks = {}) {
       }
       const [x, y] = projection([p.lng, p.lat]);
       ctx.beginPath();
-      ctx.arc(x, y, 2, 0, 2 * Math.PI);
+      ctx.arc(x, y, dotR, 0, 2 * Math.PI);
       ctx.fillStyle = COL.dot;
       ctx.fill();
     });
     if (activePt) {
       const [x, y] = activePt;
       ctx.beginPath();
-      ctx.arc(x, y, 3, 0, 2 * Math.PI);
+      ctx.arc(x, y, Math.max(3, dotR + 1.5), 0, 2 * Math.PI); // keep the highlight big
       ctx.fillStyle = COL.dotActive;
       ctx.fill();
     }
+  }
+
+  function dotRadius() {
+    const n = posts.length || 1;
+    return Math.max(1, Math.min(2.2, 6.4 / Math.pow(n, 0.3)));
   }
 
   function drawCountryGlow(f) {
