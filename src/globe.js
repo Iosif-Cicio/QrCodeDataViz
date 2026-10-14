@@ -98,16 +98,29 @@ export function createGlobe(canvas, posts, hooks = {}) {
 
     if (activeFeature) drawCountryGlow(activeFeature);
 
-    // student dots
+    // student dots — draw the inactive (grey) dots first, then the active one on
+    // top, so neighbouring dots never cover the highlighted one (canvas has no
+    // z-index; paint order is the layering).
+    let activePt = null;
     posts.forEach((p, idx) => {
       if (!isVisible(p.lng, p.lat)) return;
+      if (idx === activeIndex) {
+        activePt = projection([p.lng, p.lat]); // defer — paint it last
+        return;
+      }
       const [x, y] = projection([p.lng, p.lat]);
-      const on = idx === activeIndex;
       ctx.beginPath();
-      ctx.arc(x, y, on ? 3 : 2, 0, 2 * Math.PI);
-      ctx.fillStyle = on ? COL.dotActive : COL.dot;
+      ctx.arc(x, y, 2, 0, 2 * Math.PI);
+      ctx.fillStyle = COL.dot;
       ctx.fill();
     });
+    if (activePt) {
+      const [x, y] = activePt;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, 2 * Math.PI);
+      ctx.fillStyle = COL.dotActive;
+      ctx.fill();
+    }
   }
 
   function drawCountryGlow(f) {
